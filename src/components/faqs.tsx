@@ -1,42 +1,58 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
-const faqs = [
+interface FAQProps {
+  question: string
+  answer: string
+  value: string
+}
+
+const FAQList: FAQProps[] = [
   {
-    question: "How does the Instagram automation work?",
-    answer:
-      "Our platform uses advanced AI to automate your Instagram posts, comments, and interactions while maintaining a natural, authentic feel. You set the parameters, and our system takes care of the rest."
+    question: "Is this template free?",
+    answer: "Yes. It is a free NextJS Shadcn template.",
+    value: "item-1"
   },
   {
-    question: "Is this compliant with Instagram's terms of service?",
+    question: "Duis aute irure dolor in reprehenderit in voluptate velit?",
     answer:
-      "Yes, our automation tools are designed to work within Instagram's guidelines. We prioritize account safety and adhere to best practices to ensure your account remains in good standing."
+      "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sint labore quidem quam consectetur sapiente, iste rerum reiciendis animi nihil nostrum sit quo, modi quod.",
+    value: "item-2"
   },
   {
-    question: "Can I customize the automation for my brand?",
-    answer:
-      "Our platform offers extensive customization options. You can set your brand voice, target audience, posting schedule, and interaction preferences to align with your marketing strategy."
+    question: "Lorem ipsum dolor sit amet Consectetur natus dolor minus quibusdam?",
+    answer: "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Labore qui nostrum reiciendis veritatis.",
+    value: "item-3"
   },
   {
-    question: "What kind of results can I expect?",
-    answer:
-      "While results can vary, our users typically see increased engagement rates, follower growth, and time savings. The specific outcomes depend on your content quality, niche, and automation settings."
+    question: "Excepteur sint occaecat cupidata non proident sunt?",
+    answer: "Lorem ipsum dolor sit amet consectetur, adipisicing elit.",
+    value: "item-4"
+  },
+  {
+    question: "Enim ad minim veniam, quis nostrud exercitation ullamco laboris?",
+    answer: "consectetur adipisicing elit. Sint labore.",
+    value: "item-5"
   }
 ]
 
-export function FAQs() {
+export default function FAQs() {
   return (
-    <section className="py-12 md:py-24">
-      <div className="container px-4 md:px-6">
-        <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
-        <Accordion type="single" collapsible className="w-full max-w-3xl mx-auto">
-          {faqs.map((faq, index) => (
-            <AccordionItem key={index} value={`item-${index}`}>
-              <AccordionTrigger>{faq.question}</AccordionTrigger>
-              <AccordionContent>{faq.answer}</AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+    <section id="faq" className="container md:w-[700px] py-24 sm:py-32">
+      <div className="text-center mb-8">
+        <h2 className="text-lg text-primary text-center mb-2 tracking-wider">FAQS</h2>
+
+        <h2 className="text-3xl md:text-4xl text-center font-bold">Common Questions</h2>
       </div>
+
+      <Accordion type="single" collapsible className="AccordionRoot">
+        {FAQList.map(({ question, answer, value }) => (
+          <AccordionItem key={value} value={value}>
+            <AccordionTrigger className="text-left">{question}</AccordionTrigger>
+
+            <AccordionContent>{answer}</AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
     </section>
   )
 }

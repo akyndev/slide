@@ -1,7 +1,8 @@
-import { FAQs } from "@/components/faqs"
-import { Footer } from "@/components/footer"
-import { Pricing } from "@/components/pricing"
+import FAQs from "@/components/faqs"
+import Footer from "@/components/footer"
+import Pricing from "@/components/pricing"
 import { Button } from "@/components/ui/button"
+import { LogoSmall } from "@/svgs/logo-small"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -12,28 +13,30 @@ export default function Home() {
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
             <Link href="/" className="text-xl font-semibold">
-              Logo
+                    <div className="flex gap-x-2 items-center p-0 justify-center">
+                      <LogoSmall />
+                    </div>
             </Link>
             <div className="hidden md:flex gap-6">
               <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-                Home Page
+                Home
               </Link>
-              <Link href="/features" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+              <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-foreground">
                 Features
               </Link>
-              <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+              <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-foreground">
                 Pricing
               </Link>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <Link href={"/dashboard"}>
+            <Link href={"/sign-up"}>
               <Button variant="ghost" size="sm">
                 Sign Up
               </Button>
             </Link>
-            <Link href={"/dashboard"}>
-              <Button size="sm">Try For Free</Button>
+            <Link href={"/sign-in"}>
+              <Button size="sm">Sign In</Button>
             </Link>
           </div>
         </div>
@@ -62,21 +65,21 @@ export default function Home() {
                 </Button>
               </Link>
             </div>
-            <div className="w-full max-w-5xl">
-              <div className="aspect-video overflow-hidden rounded-lg bg-muted">
-                <Image
-                  src="/placeholder.svg"
-                  alt="Instagram Automation Platform"
-                  width={1920}
-                  height={1080}
-                  className="object-cover"
-                />
-              </div>
+            <div className="relative group mt-14">
+              <div className="absolute top-2 lg:-top-8 left-1/2 transform -translate-x-1/2 w-[90%] mx-auto h-24 lg:h-80 bg-primary/50 rounded-full blur-3xl"></div>
+              <Image
+                width={1200}
+                height={1200}
+                className="w-full md:w-[1200px] mx-auto rounded-lg relative rouded-lg leading-none flex items-center border border-t-2 border-secondary  border-t-primary/30"
+                src={"/placeholder.png"}
+                alt="dashboard"
+              />
+
+              <div className="absolute bottom-0 left-0 w-full h-20 md:h-28 bg-gradient-to-b from-background/0 via-background/50 to-background rounded-lg"></div>
             </div>
           </div>
         </div>
       </section>
-
       <Pricing />
       <FAQs />
       <Footer />

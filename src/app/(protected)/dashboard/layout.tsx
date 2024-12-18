@@ -7,14 +7,14 @@ const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
 
   if (user.status === 200 || user.status === 201) {
     if (user.data && user.data.firstname && user.data.lastname) {
-      redirect(`/dashboard/${user.data.firstname}${user.data?.lastname}`)
+      return redirect(`/dashboard/${user.data.firstname}${user.data?.lastname}`)
     }
   }
   if (user.status === 500) {
     throw new Error("Internal Server Error")
   }
-  redirect("/sign-in")
-  return <>{children}</>
+  return redirect("/sign-in")
+
 }
 
 export default DashboardLayout

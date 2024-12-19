@@ -1,5 +1,6 @@
 "use server"
 
+import { revalidatePath } from "next/cache"
 import { getIntegration } from "../integrations/queries"
 import { onCurrentUser } from "../user"
 import {
@@ -16,14 +17,16 @@ import {
 } from "./queries"
 
 export const createAutomation = async () => {
+  const user = await onCurrentUser()
   try {
     const create = await createAutomationQuery()
-    if (create) return { status: 200, data: "automation created" }
-    return { status: 400, data: "Oops! Failed to create automation" }
+    if (create) {
+      console.log("created")
+    }
   } catch (error) {
     console.error(error)
-    return { status: 500, data: "Internal Server Error" }
   }
+  revalidatePath(`/dashboard/${user.firstName}${user.lastName}/automations`)
 }
 
 export const getAllAutomations = async () => {
@@ -84,17 +87,14 @@ export const saveListener = async (
   prompt: string,
   reply?: string
 ) => {
+  const user = await onCurrentUser()
   try {
-    await onCurrentUser()
     const create = await addListener(automationId, listener, prompt, reply)
-    if (create) return { status: 200, data: "listener added" }
-    return { status: 400 }
+    if (create) console.log("created")
   } catch (error) {
     console.error(error)
-    return {
-      status: 500
-    }
   }
+  revalidatePath(`/dashboard/${user.firstName}${user.lastName}/automations/${automationId}`)
 }
 
 export const saveTrigger = async (automationId: string, trigger: string[]) => {

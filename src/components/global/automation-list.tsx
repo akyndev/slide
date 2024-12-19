@@ -1,11 +1,9 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { useMutationDataState } from "@/hooks/use-mutation-data"
 import { usePaths } from "@/hooks/user-nav"
 import { useQueryAutomations } from "@/hooks/user-queries"
 import { cn, getMonth } from "@/lib/utils"
 import Link from "next/link"
-import { useMemo } from "react"
 import CreateAutomation from "./create-automation"
 import GradientButton from "./gradient-button"
 
@@ -14,16 +12,7 @@ type Props = {}
 const AutomationList = (props: Props) => {
   const { data } = useQueryAutomations()
 
-  const { latestVariable } = useMutationDataState(["create-automation"])
   const { pathname } = usePaths()
-
-  const optimisticUiData = useMemo(() => {
-    if (latestVariable && latestVariable?.variables && data) {
-      const test = [latestVariable.variables, ...data.data]
-      return { data: test }
-    }
-    return data || { data: [] }
-  }, [latestVariable, data])
 
   if (data?.status !== 200 || data.data.length <= 0) {
     return (
@@ -36,7 +25,7 @@ const AutomationList = (props: Props) => {
 
   return (
     <div className="flex flex-col gap-y-3">
-      {optimisticUiData.data.map((automation) => (
+      {data.data.map((automation) => (
         <Link
           href={`${pathname}/${automation.id}`}
           key={automation.id}

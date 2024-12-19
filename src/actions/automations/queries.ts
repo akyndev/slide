@@ -2,7 +2,7 @@
 
 import { db } from "@/db"
 import { automations, keywords, listeners, posts, triggers } from "@/db/schema"
-import { eq } from "drizzle-orm"
+import { desc, eq } from "drizzle-orm"
 import { onCurrentUser } from "../user"
 
 export const createAutomation = async () => {
@@ -18,7 +18,8 @@ export const getAllAutomationsQuery = async (clerkId: string) => {
     with: {
       keywords: true,
       listener: true
-    }
+    },
+    orderBy: [desc(automations.createdAt)]
   })
 }
 
@@ -73,7 +74,7 @@ export const addListener = async (
       listenerId: data[0].id
     })
     .where(eq(automations.id, automationId))
-  
+
   console.log(data)
   return data
 }

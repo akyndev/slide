@@ -51,25 +51,7 @@ export const useEditAutomation = (automationId: string) => {
   }
 }
 
-export const useListener = (id: string) => {
-  const [listener, setListener] = useState<"message" | "smart_ai" | null>(null)
 
-  const promptSchema = z.object({
-    prompt: z.string().min(1),
-    reply: z.string()
-  })
-
-  const { isPending, mutate } = useMutationData(
-    ["create-lister"],
-    (data: { prompt: string; reply: string }) => saveListener(id, listener || "message", data.prompt, data.reply),
-    "automation-info"
-  )
-
-  const { errors, onFormSubmit, register, reset, watch } = useZodForm(promptSchema, mutate)
-
-  const onSetListener = (type: "smart_ai" | "message") => setListener(type)
-  return { onSetListener, register, onFormSubmit, listener, isPending }
-}
 
 export const useTriggers = (id: string) => {
   const dispatch = useAppDispatch()

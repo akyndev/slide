@@ -1,3 +1,4 @@
+"use client"
 import { Button } from "@/components/ui/button"
 import { useAutomationPosts, useQueryAutomationPosts } from "@/hooks/user-queries"
 import { cn } from "@/lib/utils"
@@ -14,8 +15,6 @@ type Props = {
 const PostButton = ({ id }: Props) => {
   const { data } = useQueryAutomationPosts(id)
   const { posts, onSelectPost, mutate, isPending } = useAutomationPosts(id)
-
-  console.log(data)
 
   return (
     <TriggerButton label="Attach a post">

@@ -19,66 +19,217 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const webhook_payload = await req.json()
-  const messaging = webhook_payload.entry[0].messaging
-  const changes = webhook_payload.entry[0].changes
-  const sender = messaging[0].sender.id
-  const webhook_id = webhook_payload.entry[0].id
-  const text = messaging[0].message.text
-  const changes_id = changes[0].value.id
-  const changes_text = changes[0].value.text
+  if (webhook_payload) {
+    console.log("WEBHOOK PAYLOAD", webhook_payload)
+    const messaging = webhook_payload.entry[0].messaging
+    const changes = webhook_payload.entry[0].changes
+    const sender = messaging[0].sender.id
+    const webhook_id = webhook_payload.entry[0].id
+    const text = messaging[0].message.text
+    const changes_id = changes[0].value.id
+    const changes_text = changes[0].value.text
 
-  let matcher
+    let matcher
 
-  try {
-    if (messaging) matcher = await matchKeyword(text)
+    try {
+      if (messaging) matcher = await matchKeyword(text)
 
-    if (changes) matcher = await matchKeyword(changes_text)
+      if (changes) matcher = await matchKeyword(changes_text)
 
-    if (matcher && matcher.automationId) {
-      console.log("Matched", matcher)
-      // We have a keyword matcher
+      if (matcher && matcher.automationId) {
+        console.log("Matched", matcher)
+        // We have a keyword matcher
 
-      if (messaging) {
-        const automation = await getKeywordAutomation(matcher.automationId, true)
+        if (messaging) {
+          const automation = await getKeywordAutomation(matcher.automationId, true)
 
-        if (automation && automation.triggers) {
-          if (automation.listener && automation.listener.listener === "message") {
-            const direct_message = await sendDM(
-              webhook_id,
-              sender,
-              automation.listener?.prompt!,
-              automation.user?.integrations[0].token!
-            )
-            console.log("DIRECT HARDCODED MESSAGE SENT...")
+          if (automation && automation.triggers) {
+            if (automation.listener && automation.listener.listener === "message") {
+              const direct_message = await sendDM(
+                webhook_id,
+                sender,
+                automation.listener?.prompt!,
+                automation.user?.integrations[0].token!
+              )
+              console.log("DIRECT HARDCODED MESSAGE SENT...")
 
-            if (direct_message.status === 200) {
-              console.log("TRACKING RESPONSES...")
-              const tracked = await trackResponses(automation.id, "dm")
-              if (tracked) {
-                return NextResponse.json(
+              if (direct_message.status === 200) {
+                console.log("TRACKING RESPONSES...")
+                const tracked = await trackResponses(automation.id, "dm")
+                if (tracked) {
+                  return NextResponse.json(
+                    {
+                      message: "Message sent"
+                    },
+                    { status: 200 }
+                  )
+                }
+              }
+            }
+
+            if (
+              automation.listener &&
+              automation.listener.listener === "smart_ai" &&
+              automation.user?.subscription?.plan === "pro"
+            ) {
+              const smart_ai_message = await openai.chat.completions.create({
+                model: "grok-2-1212",
+                messages: [
                   {
-                    message: "Message sent"
-                  },
-                  { status: 200 }
+                    role: "assistant",
+                    content: `${automation.listener?.prompt}: Keep responses under 2 sentences`
+                  }
+                ]
+              })
+
+              if (smart_ai_message.choices[0].message.content) {
+                await createTransaction(
+                  automation.id,
+                  webhook_id,
+                  sender,
+                  text,
+                  smart_ai_message.choices[0].message.content!
                 )
+
+                const direct_message = await sendDM(
+                  webhook_id,
+                  sender,
+                  smart_ai_message.choices[0].message.content,
+                  automation.user?.integrations[0].token!
+                )
+
+                if (direct_message.status === 200) {
+                  console.log("TRACKING RESPONSES...")
+                  const tracked = await trackResponses(automation.id, "dm")
+                  if (tracked) {
+                    return NextResponse.json(
+                      {
+                        message: "Message sent"
+                      },
+                      { status: 200 }
+                    )
+                  }
+                }
               }
             }
           }
+        }
 
-          if (
-            automation.listener &&
-            automation.listener.listener === "smart_ai" &&
-            automation.user?.subscription?.plan === "pro"
-          ) {
+        if (changes && changes[0].field === "comments") {
+          const automation = await getKeywordAutomation(matcher.automationId, false)
+          console.log("getting the automations", automation)
+
+          const automations_post = await getKeywordPost(changes[0].value.media.id, automation?.id!)
+          console.log("found keyword ", automations_post)
+
+          if (automation && automations_post && automation.triggers) {
+            if (automation.listener) {
+              console.log("WE HAVE A LISTENER OF TYPE:", automation.listener.listener)
+
+              if (automation.listener.listener === "message") {
+                console.log("SENDING DM, WEB HOOK PAYLOAD", webhook_payload, "changes", changes[0].value.from)
+
+                console.log("COMMENT VERSION:", changes[0].value.from.id)
+
+                const direct_message = await sendPrivateMessage(
+                  webhook_id,
+                  changes_id,
+                  automation.listener?.prompt!,
+                  automation.user?.integrations[0].token!
+                )
+
+                console.log("DM SENT", direct_message.data)
+
+                if (direct_message.status === 200) {
+                  console.log("TRACKING RESPONSES FOR COMMENT...")
+                  const tracked = await trackResponses(automation.id, "comment")
+
+                  if (tracked) {
+                    return NextResponse.json(
+                      {
+                        message: "Message sent"
+                      },
+                      { status: 200 }
+                    )
+                  }
+                }
+              }
+
+              if (automation.listener.listener === "smart_ai" && automation.user?.subscription?.plan === "pro") {
+                console.log("PROMPTING GROK....")
+                const smart_ai_message = await openai.chat.completions.create({
+                  model: "grok-2-1212",
+                  messages: [
+                    {
+                      role: "assistant",
+                      content: `${automation.listener?.prompt}: keep responses under 2 sentences`
+                    }
+                  ]
+                })
+                console.log("DONE PROMPTING...", smart_ai_message)
+
+                if (smart_ai_message.choices[0].message.content) {
+                  await createTransaction(
+                    automation.id,
+                    webhook_id,
+                    sender,
+                    text,
+                    smart_ai_message.choices[0].message.content!
+                  )
+
+                  const direct_message = await sendPrivateMessage(
+                    webhook_id,
+                    changes_id,
+                    automation.listener?.prompt!,
+                    automation.user?.integrations[0].token!
+                  )
+                  console.log("PRIVATE MESSAGE SENT!!!", direct_message)
+
+                  if (direct_message.status === 200) {
+                    console.log("TRACKING RESPONSES...")
+                    const tracked = await trackResponses(automation.id, "comment")
+
+                    if (tracked) {
+                      return NextResponse.json(
+                        {
+                          message: "Message sent"
+                        },
+                        { status: 200 }
+                      )
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (!matcher) {
+        console.log("GETTING CHAT HISTORY...")
+        const customer_history = await getChatHistory(messaging[0].recipient.id, sender)
+        console.log("DONE GETTING CHAT HISTORY!!!")
+
+        if (customer_history.history.length > 0) {
+          const automation = await findAutomation(customer_history.automationId!)
+
+          if (automation?.user?.subscription?.plan === "pro" && automation.listener?.listener === "smart_ai") {
+            console.log("PROMPTING GROK IN A NO MATCHER....")
             const smart_ai_message = await openai.chat.completions.create({
               model: "grok-2-1212",
               messages: [
                 {
                   role: "assistant",
-                  content: `${automation.listener?.prompt}: Keep responses under 2 sentences`
+                  content: `${automation.listener?.prompt}: keep responses under 2 sentences`
+                },
+                ...customer_history.history,
+                {
+                  role: "user",
+                  content: text
                 }
               ]
             })
+            console.log("DONE PROMPTING...", smart_ai_message)
 
             if (smart_ai_message.choices[0].message.content) {
               await createTransaction(
@@ -95,169 +246,28 @@ export async function POST(req: NextRequest) {
                 smart_ai_message.choices[0].message.content,
                 automation.user?.integrations[0].token!
               )
+              console.log("DIRECT MESSAGE SENT!!!", direct_message)
 
               if (direct_message.status === 200) {
-                console.log("TRACKING RESPONSES...")
-                const tracked = await trackResponses(automation.id, "dm")
-                if (tracked) {
-                  return NextResponse.json(
-                    {
-                      message: "Message sent"
-                    },
-                    { status: 200 }
-                  )
-                }
-              }
-            }
-          }
-        }
-      }
+                //if successfully send we return
 
-      if (changes && changes[0].field === "comments") {
-        const automation = await getKeywordAutomation(matcher.automationId, false)
-        console.log("getting the automations", automation)
-
-        const automations_post = await getKeywordPost(changes[0].value.media.id, automation?.id!)
-        console.log("found keyword ", automations_post)
-
-        if (automation && automations_post && automation.triggers) {
-          if (automation.listener) {
-            console.log("WE HAVE A LISTENER OF TYPE:", automation.listener.listener)
-
-            if (automation.listener.listener === "message") {
-              console.log("SENDING DM, WEB HOOK PAYLOAD", webhook_payload, "changes", changes[0].value.from)
-
-              console.log("COMMENT VERSION:", changes[0].value.from.id)
-
-              const direct_message = await sendPrivateMessage(
-                webhook_id,
-                changes_id,
-                automation.listener?.prompt!,
-                automation.user?.integrations[0].token!
-              )
-
-              console.log("DM SENT", direct_message.data)
-
-              if (direct_message.status === 200) {
-                console.log("TRACKING RESPONSES FOR COMMENT...")
-                const tracked = await trackResponses(automation.id, "comment")
-
-                if (tracked) {
-                  return NextResponse.json(
-                    {
-                      message: "Message sent"
-                    },
-                    { status: 200 }
-                  )
-                }
-              }
-            }
-
-            if (automation.listener.listener === "smart_ai" && automation.user?.subscription?.plan === "pro") {
-              console.log("PROMPTING GROK....")
-              const smart_ai_message = await openai.chat.completions.create({
-                model: "grok-2-1212",
-                messages: [
+                return NextResponse.json(
                   {
-                    role: "assistant",
-                    content: `${automation.listener?.prompt}: keep responses under 2 sentences`
-                  }
-                ]
-              })
-              console.log("DONE PROMPTING...", smart_ai_message)
-
-              if (smart_ai_message.choices[0].message.content) {
-                await createTransaction(
-                  automation.id,
-                  webhook_id,
-                  sender,
-                  text,
-                  smart_ai_message.choices[0].message.content!
+                    message: "Message sent"
+                  },
+                  { status: 200 }
                 )
-
-                const direct_message = await sendPrivateMessage(
-                  webhook_id,
-                  changes_id,
-                  automation.listener?.prompt!,
-                  automation.user?.integrations[0].token!
-                )
-                console.log("PRIVATE MESSAGE SENT!!!", direct_message)
-
-                if (direct_message.status === 200) {
-                  console.log("TRACKING RESPONSES...")
-                  const tracked = await trackResponses(automation.id, "comment")
-
-                  if (tracked) {
-                    return NextResponse.json(
-                      {
-                        message: "Message sent"
-                      },
-                      { status: 200 }
-                    )
-                  }
-                }
               }
             }
           }
         }
-      }
-    }
 
-    if (!matcher) {
-      console.log("GETTING CHAT HISTORY...")
-      const customer_history = await getChatHistory(messaging[0].recipient.id, sender)
-      console.log("DONE GETTING CHAT HISTORY!!!")
-
-      if (customer_history.history.length > 0) {
-        const automation = await findAutomation(customer_history.automationId!)
-
-        if (automation?.user?.subscription?.plan === "pro" && automation.listener?.listener === "smart_ai") {
-          console.log("PROMPTING GROK IN A NO MATCHER....")
-          const smart_ai_message = await openai.chat.completions.create({
-            model: "grok-2-1212",
-            messages: [
-              {
-                role: "assistant",
-                content: `${automation.listener?.prompt}: keep responses under 2 sentences`
-              },
-              ...customer_history.history,
-              {
-                role: "user",
-                content: text
-              }
-            ]
-          })
-          console.log("DONE PROMPTING...", smart_ai_message)
-
-          if (smart_ai_message.choices[0].message.content) {
-            await createTransaction(
-              automation.id,
-              webhook_id,
-              sender,
-              text,
-              smart_ai_message.choices[0].message.content!
-            )
-
-            const direct_message = await sendDM(
-              webhook_id,
-              sender,
-              smart_ai_message.choices[0].message.content,
-              automation.user?.integrations[0].token!
-            )
-            console.log("DIRECT MESSAGE SENT!!!", direct_message)
-
-            if (direct_message.status === 200) {
-              //if successfully send we return
-
-              return NextResponse.json(
-                {
-                  message: "Message sent"
-                },
-                { status: 200 }
-              )
-            }
-          }
-        }
+        return NextResponse.json(
+          {
+            message: "No automation set"
+          },
+          { status: 200 }
+        )
       }
 
       return NextResponse.json(
@@ -266,20 +276,19 @@ export async function POST(req: NextRequest) {
         },
         { status: 200 }
       )
+    } catch (error) {
+      return NextResponse.json(
+        {
+          message: "No automation set"
+        },
+        { status: 200 }
+      )
     }
-
-    return NextResponse.json(
-      {
-        message: "No automation set"
-      },
-      { status: 200 }
-    )
-  } catch (error) {
-    return NextResponse.json(
-      {
-        message: "No automation set"
-      },
-      { status: 200 }
-    )
   }
+  return NextResponse.json(
+    {
+      message: "No webhook payload"
+    },
+    { status: 200 }
+  )
 }

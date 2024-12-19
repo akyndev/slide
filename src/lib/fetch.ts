@@ -37,7 +37,7 @@ export const sendPrivateMessage = async (userId: string, recieverId: string, pro
       recipient: {
         comment_id: recieverId
       },
-      MESSAGE: {
+      message: {
         text: prompt
       }
     },

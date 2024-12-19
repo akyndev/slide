@@ -18,6 +18,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  console.log("WEBHOOK STARTING...")
   const webhook_payload = await req.json()
   if (webhook_payload) {
     console.log("WEBHOOK PAYLOAD", webhook_payload)

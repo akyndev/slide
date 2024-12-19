@@ -66,7 +66,7 @@ export const getKeywordAutomation = async (automationId: string, dm: boolean) =>
 }
 
 export const getKeywordPost = async (postId: string, automationId: string) => {
-  const post =  await db.query.posts.findFirst({
+  const post = await db.query.posts.findFirst({
     where: and(eq(posts.postId, postId), eq(posts.automationId, automationId)),
     columns: {
       automationId: true
@@ -98,4 +98,19 @@ export const trackResponses = async (automationId: string, type: "dm" | "comment
       })
       .where(eq(listeners.automationId, automationId))
   }
+}
+
+export const createTransaction = async (
+  automationId: string,
+  sender: string,
+  reciever: string,
+  text: string,
+  content: string
+) => {
+  console.log("CREATING TRANSACTION...")
+  await db.transaction(async () => {
+    await createChatHistory(automationId, sender, reciever, text),
+      await createChatHistory(automationId, sender, reciever, content)
+  })
+  console.log("TRANSACTION CREATED!!!")
 }

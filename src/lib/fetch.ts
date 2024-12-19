@@ -9,7 +9,7 @@ export const refreshToken = async (token: string) => {
 }
 
 export const sendDM = async (userId: string, recieverId: string, prompt: string, token: string) => {
-  console.log("sending message")
+  console.log("SENDING MESSAGE...")
   return await axios.post(
     `${process.env.INSTAGRAM_BASE_URL}/v21.0/${userId}/messages`,
     {
@@ -30,7 +30,7 @@ export const sendDM = async (userId: string, recieverId: string, prompt: string,
 }
 
 export const sendPrivateMessage = async (userId: string, recieverId: string, prompt: string, token: string) => {
-  console.log("sending message")
+  console.log("SENDING PRIVATE MESSAGE...")
   return await axios.post(
     `${process.env.INSTAGRAM_BASE_URL}/${userId}/messages`,
     {

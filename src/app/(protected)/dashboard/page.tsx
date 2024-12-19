@@ -1,24 +1,8 @@
-"use client"
-import { useUser } from "@clerk/nextjs"
-import { redirect } from "next/navigation"
-import { useEffect } from "react"
+import { onBoardUser } from "@/actions/user"
 
-const DashboardLayout = () => {
-  const { isSignedIn, user } = useUser()
-
-  useEffect(() => {
-    if (isSignedIn) {
-      redirect(`/dashboard/${user?.firstName}${user?.lastName}`)
-    }
-
-    if (!isSignedIn) redirect("/sign-in")
-  })
-
-  return (
-    <div className="flex items-center justify-center">
-      <p>redirecting...</p>
-    </div>
-  )
+const DashboardPage = async () => {
+  await onBoardUser()
+  return <div className="flex items-center justify-center h-screen">Dashboard Redirecting...</div>
 }
 
-export default DashboardLayout
+export default DashboardPage

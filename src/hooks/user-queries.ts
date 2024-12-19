@@ -1,5 +1,5 @@
 import { getAllAutomations, getAutomationInfo, getProfilePosts, savePosts } from "@/actions/automations"
-import { onUserInfo } from "@/actions/user"
+import { onBoardUser, onUserInfo } from "@/actions/user"
 import { changeMediaType } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
@@ -11,6 +11,7 @@ export const useQueryUser = () => {
     queryFn: onUserInfo
   })
 }
+
 
 export const useQueryAutomations = () => {
   return useQuery({

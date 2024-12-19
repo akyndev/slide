@@ -4,9 +4,7 @@ import { AUTOMATION_TRIGGERS } from "@/constants"
 import { useTriggers } from "@/hooks/use-automations"
 import { useQueryAutomation } from "@/hooks/user-queries"
 import { cn } from "@/lib/utils"
-import { automationStore } from "@/zustand/store"
-import { useEffect } from "react"
-import { useAutomationStore } from "../automation-provider"
+import { useAppSelector } from "@/redux/automation-slice"
 import { Button } from "../ui/button"
 import { Separator } from "../ui/separator"
 import ActiveTrigger from "./active"
@@ -21,21 +19,8 @@ type Props = {
 
 const Trigger = ({ id }: Props) => {
   const { onSaveTrigger, isPending, onSetTrigger } = useTriggers(id)
-  const types = useAutomationStore((state) => state.trigger.types)
-
-  useEffect(() => {
-    console.log("unsubscribePositionStore")
-    const unsubscribePositionStore: any = automationStore().subscribe(({ trigger }) => {
-      console.log("new position", { trigger })
-      return trigger.types
-    })
-
-    return () => {
-      unsubscribePositionStore()
-    }
-  }, [])
-
   const { data } = useQueryAutomation(id)
+  const types = useAppSelector((state) => state.automation.trigger.types)
 
   if (data?.data && data.data?.triggers.length > 0) {
     return (

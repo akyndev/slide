@@ -18,7 +18,7 @@ import {
 export const createAutomation = async () => {
   try {
     const create = await createAutomationQuery()
-    if (create) return { status: 201, data: "automation created" }
+    if (create) return { status: 200, data: "automation created" }
     return { status: 400, data: "Oops! Failed to create automation" }
   } catch (error) {
     console.error(error)
@@ -87,7 +87,7 @@ export const saveListener = async (
   try {
     await onCurrentUser()
     const create = await addListener(automationId, listener, prompt, reply)
-    if (create) return { status: 201, data: "listener" }
+    if (create) return { status: 200, data: "listener added" }
     return { status: 400 }
   } catch (error) {
     console.error(error)
@@ -101,7 +101,7 @@ export const saveTrigger = async (automationId: string, trigger: string[]) => {
   try {
     await onCurrentUser()
     const create = await addTrigger(automationId, trigger)
-    if (create) return { status: 201, data: "Trigger created" }
+    if (create) return { status: 200, data: "Trigger created" }
     return { status: 400 }
   } catch (error) {
     console.error(error)
@@ -115,7 +115,7 @@ export const saveKeyword = async (automationId: string, keyword: string) => {
   try {
     await onCurrentUser()
     const create = await addKeyword(automationId, keyword)
-    if (create) return { status: 201, data: "Keyword created" }
+    if (create) return { status: 200, data: "Keyword created" }
     return { status: 400 }
   } catch (error) {
     console.error(error)
@@ -158,19 +158,16 @@ export const activateAutomation = async (id: string, state: boolean) => {
 export const getProfilePosts = async () => {
   try {
     const user = await onCurrentUser()
-      console.log("posts fetched successfully")
     const integration = await getIntegration(user.id)
     const posts = await fetch(
       `${process.env.INSTAGRAM_BASE_URL}/me/media?fields=id,caption,media_url,media_type,timestamp&limit=10&access_token=${integration?.token}`
     )
-    console.log("posts fetched successfully")
     const parsed = await posts.json()
-    console.log(parsed)
     if (parsed) return { status: 200, data: parsed }
     console.log("🔴 Error in getting posts")
     return { status: 404 }
   } catch (error) {
-    console.log("🔴 server side Error in getting posts ", error)
+    console.log("🔴 server side Error in getting posts", error)
     return { status: 500 }
   }
 }
@@ -191,7 +188,7 @@ export const savePosts = async (
   try {
     await onCurrentUser()
     const create = await addPost(readyPosts)
-    if (create) return { status: 201, data: "Trigger created" }
+    if (create) return { status: 200, data: "Trigger created" }
     return { status: 400 }
   } catch (error) {
     console.error(error)

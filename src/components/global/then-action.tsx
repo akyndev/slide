@@ -13,50 +13,50 @@ type Props = {
 }
 
 const ThenAction = ({ id }: Props) => {
-  const { onSetListener, listener: Listener, onFormSubmit, register, isPending } = useListener(id)
+  const { onSetListener, listener, onFormSubmit, register, isPending } = useListener(id)
 
   return (
     <TriggerButton label="Then">
       <div className="flex flex-col gap-y-2 ">
-        {AUTOMATION_LISTENERS.map((listener) =>
-          listener.type === "smart_ai" ? (
-            <SubscriptionPlan key={listener.type} type="pro">
+        {AUTOMATION_LISTENERS.map((listen) =>
+          listen.type === "smart_ai" ? (
+            <SubscriptionPlan key={listen.type} type="pro">
               <div
-                onClick={() => onSetListener(listener.type)}
-                key={listener.id}
+                onClick={() => onSetListener(listen.type)}
+                key={listen.id}
                 className={cn(
-                  Listener === listener.type ? "bg-gradient-to-br from-[#3352CC] to-[#1C2D70]" : "bg-background-80",
+                  listener === listen.type ? "bg-gradient-to-br from-[#3352CC] to-[#1C2D70]" : "bg-background-80",
                   "p-3 rounded-xl flex flex-col gap-y-2 cursor-pointer hover:opacity-80 transition duration-100"
                 )}
               >
                 <div className="flex gap-x-2 items-center">
-                  {listener.icon}
-                  <p>{listener.label}</p>
+                  {listen.icon}
+                  <p>{listen.label}</p>
                 </div>
-                <p>{listener.description}</p>
+                <p>{listen.description}</p>
               </div>
             </SubscriptionPlan>
           ) : (
             <div
-              onClick={() => onSetListener(listener.type)}
-              key={listener.id}
+              onClick={() => onSetListener(listen.type)}
+              key={listen.id}
               className={cn(
-                Listener === listener.type ? "bg-gradient-to-br from-[#3352CC] to-[#1C2D70]" : "bg-background-80",
+                listener === listen.type ? "bg-gradient-to-br from-[#3352CC] to-[#1C2D70]" : "bg-background-80",
                 "p-3 rounded-xl flex flex-col gap-y-2 cursor-pointer hover:opacity-80 transition duration-100"
               )}
             >
               <div className="flex gap-x-2 items-center">
-                {listener.icon}
-                <p>{listener.label}</p>
+                {listen.icon}
+                <p>{listen.label}</p>
               </div>
-              <p>{listener.description}</p>
+              <p>{listen.description}</p>
             </div>
           )
         )}
         <form onSubmit={onFormSubmit} className="flex flex-col gap-y-2">
           <Textarea
             placeholder={
-              Listener === "smart_ai"
+              listener === "smart_ai"
                 ? "Add a prompt that your smart ai can use..."
                 : "Add a message you want send to your customers"
             }
@@ -68,7 +68,7 @@ const ThenAction = ({ id }: Props) => {
             placeholder="Add a reply for comments (Optional)"
             className="bg-background-80 outline-none border-none ring-0 focus:ring-0"
           />
-          <Button className="bg-gradient-to-br w-full from-[#3352CC] font-medium text-white to-[#1C2D70]">
+          <Button type="submit" className="bg-gradient-to-br w-full from-[#3352CC] font-medium text-white to-[#1C2D70]">
             <Loader state={isPending}>Add listener</Loader>
           </Button>
         </form>

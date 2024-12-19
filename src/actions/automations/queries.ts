@@ -73,6 +73,8 @@ export const addListener = async (
       listenerId: data[0].id
     })
     .where(eq(automations.id, automationId))
+  
+  console.log(data)
   return data
 }
 

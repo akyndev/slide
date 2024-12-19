@@ -1,10 +1,11 @@
+"use client"
 import { deleteKeyword, saveKeyword, saveListener, saveTrigger, updateAutomationName } from "@/actions/automations"
 import { createAutomation } from "@/actions/automations/queries"
+import { triggerFn, useAppDispatch } from "@/redux/automation-slice"
 import { useEffect, useRef, useState } from "react"
 import { z } from "zod"
 import { useMutationData } from "./use-mutation-data"
 import { useZodForm } from "./use-zod-form"
-import { automationStore } from "@/zustand/store"
 
 export const useCreateAutomation = () => {
   const { isPending, mutate } = useMutationData(["create-automation"], () => createAutomation(), "user-automations")
@@ -71,10 +72,8 @@ export const useListener = (id: string) => {
 }
 
 export const useTriggers = (id: string) => {
-  const triggerFn = automationStore().getState().triggerFn
-
-
-  const onSetTrigger = (type: "COMMENT" | "DM") => triggerFn(type)
+  const dispatch = useAppDispatch()
+  const onSetTrigger = (type: "COMMENT" | "DM") => dispatch(triggerFn(type))
 
   const { isPending, mutate } = useMutationData(
     ["add-trigger"],
@@ -112,4 +111,3 @@ export const useKeywords = (id: string) => {
 
   return { keyword, onValueChange, onKeyPress, deleteMutation }
 }
-

@@ -16,7 +16,7 @@ type Props = {
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const info = await getAutomationInfo(params.id)
   return {
-    title: typeof info.data?.name
+    title: info.data?.name
   }
 }
 

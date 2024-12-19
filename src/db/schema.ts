@@ -23,13 +23,13 @@ export const users = pgTable("Users", {
 export const usersRelations = relations(users, ({ one, many }) => ({
   subscription: one(subscriptions),
   integrations: many(integrations),
-  automations: many(automations),
+  automations: many(automations)
 }))
 
 export const subscriptions = pgTable("Subscriptions", {
   id: uuid().primaryKey().unique().defaultRandom().notNull(),
   customerId: varchar("customer_id").unique(),
-  userId: varchar("user_id"),
+  userId: varchar("user_id").references(() => users.clerkId, { onDelete: "cascade" }),
   plan: subscriptionsPlanEnum(),
   ...timestamps
 })
@@ -39,7 +39,7 @@ export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
 
 export const integrations = pgTable("Integrations", {
   id: uuid().primaryKey().unique().defaultRandom().notNull(),
-  userId: varchar("user_id"),
+  userId: varchar("user_id").references(() => users.clerkId, { onDelete: "cascade" }),
   instagramId: varchar("instagram_id", { length: 255 }).unique(),
   expiresAt: date("expires_at"),
   token: varchar(),
@@ -56,8 +56,8 @@ export const integrationsRelations = relations(integrations, ({ one }) => ({
 
 export const automations = pgTable("Automations", {
   id: uuid().primaryKey().unique().defaultRandom().notNull(),
-  userId: varchar("user_id"),
-  name: varchar().default("untitled"),
+  userId: varchar("user_id").references(() => users.clerkId, { onDelete: "cascade" }),
+  name: varchar().default("untitled").notNull(),
   active: boolean().default(false),
   listenerId: uuid(),
   ...timestamps
@@ -83,7 +83,7 @@ export const dms = pgTable("Dms", {
   message: varchar(),
   reciever: varchar(),
   senderId: varchar("sender_id"),
-  automationId: uuid("automation_id"),
+  automationId: uuid("automation_id").references(() => automations.id, { onDelete: "cascade" }),
   ...timestamps
 })
 
@@ -100,7 +100,7 @@ export const posts = pgTable("Posts", {
   caption: varchar(),
   media: varchar(),
   mediaType: mediaTypeEnum("media_type").default("image"),
-  automationId: uuid("automation_id")
+  automationId: uuid("automation_id").references(() => automations.id, { onDelete: "cascade" })
 })
 
 export const postsRelations = relations(posts, ({ one }) => ({
@@ -116,7 +116,7 @@ export const listeners = pgTable("Listeners", {
   commentReply: varchar("comment_reply"),
   dmsCount: integer().default(0),
   commentCount: integer().default(0),
-  automationId: uuid("automation_id"),
+  automationId: uuid("automation_id").references(() => automations.id, { onDelete: "cascade" }),
   listener: listenersEnum().default("message")
 })
 
@@ -130,7 +130,7 @@ export const listnersRelations = relations(listeners, ({ one }) => ({
 export const triggers = pgTable("Triggers", {
   id: uuid().primaryKey().unique().defaultRandom().notNull(),
   type: varchar(),
-  automationId: uuid("automation_id")
+  automationId: uuid("automation_id").references(() => automations.id, { onDelete: "cascade" })
 })
 
 export const triggersRelations = relations(triggers, ({ one }) => ({
@@ -143,7 +143,7 @@ export const triggersRelations = relations(triggers, ({ one }) => ({
 export const keywords = pgTable("Keywords", {
   id: uuid().primaryKey().unique().defaultRandom().notNull(),
   word: varchar({ length: 255 }),
-  automationId: uuid("automation_id")
+  automationId: uuid("automation_id").references(() => automations.id, { onDelete: "cascade" })
 })
 
 export const keywordsRelations = relations(keywords, ({ one }) => ({

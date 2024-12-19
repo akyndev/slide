@@ -16,8 +16,8 @@ export const onCurrentUser = async () => {
 }
 
 export const onBoardUser = async () => {
+  const user = await onCurrentUser()
   try {
-    const user = await onCurrentUser()
     const existingUser = await findUser(user.id)
     if (existingUser) {
       const integration = await getIntegration(user.id)
@@ -42,21 +42,13 @@ export const onBoardUser = async () => {
           }
         }
       }
-
-      return {
-        status: 200,
-        data: {
-          firstname: existingUser.firstName,
-          lastname: existingUser.lastName
-        }
-      }
+    } else {
+      await createUser(user.id, user.firstName!, user.lastName!, user.emailAddresses[0].emailAddress)
     }
-    const created = await createUser(user.id, user.firstName!, user.lastName!, user.emailAddresses[0].emailAddress)
-    return { status: 201, data: created[0] }
   } catch (error) {
     console.log(error)
-    return { status: 500 }
   }
+  redirect(`dashboard/${user.firstName}${user.lastName}`)
 }
 
 export const onUserInfo = async () => {

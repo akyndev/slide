@@ -1,11 +1,10 @@
 "use client"
 import { ChevronRight, PencilIcon } from "lucide-react"
-// import ActivateAutomationButton from "../../activate-automation-button"
-// import { useQueryAutomation } from "@/hooks/user-queries"
 import { Input } from "@/components/ui/input"
 import { useEditAutomation } from "@/hooks/use-automations"
 import { useMutationDataState } from "@/hooks/use-mutation-data"
 import { useQueryAutomation } from "@/hooks/user-queries"
+import ActivateAutomationButton from "./activate-automation-button"
 
 type Props = {
   id: string
@@ -35,7 +34,7 @@ const AutomationsBreadCrumb = ({ id }: Props) => {
             </p>
           )}
           {edit ? (
-            <></>
+            null
           ) : (
             <span
               className="cursor-pointer hover:opacity-75 duration-100 transition flex-shrink-0 mr-4"
@@ -55,7 +54,7 @@ const AutomationsBreadCrumb = ({ id }: Props) => {
           <p className="text-text-secondary text-sm truncate min-w-0">Changes Saved</p>
         </div>
       </div>
-      {/* <ActivateAutomationButton id={id} /> */}
+      <ActivateAutomationButton id={id} />
     </div>
   )
 }

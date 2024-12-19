@@ -66,12 +66,14 @@ export const getKeywordAutomation = async (automationId: string, dm: boolean) =>
 }
 
 export const getKeywordPost = async (postId: string, automationId: string) => {
-  return await db.query.posts.findFirst({
+  const post =  await db.query.posts.findFirst({
     where: and(eq(posts.id, postId), eq(posts.automationId, automationId)),
     columns: {
       automationId: true
     }
   })
+  console.log(post)
+  return post
 }
 
 export const matchKeyword = async (keyword: string) => {

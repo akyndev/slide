@@ -116,7 +116,6 @@ export async function POST(req: NextRequest) {
       if (webhook_payload.entry[0].changes && webhook_payload.entry[0].changes[0].field === "comments") {
         const automation = await getKeywordAutomation(matcher.automationId, false)
 
-        console.log(automation)
         console.log("geting the automations")
 
         const automations_post = await getKeywordPost(

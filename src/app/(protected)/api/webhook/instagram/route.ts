@@ -12,19 +12,18 @@ import { sendDM, sendPrivateMessage } from "@/lib/fetch"
 import { openai } from "@/lib/openai"
 import { NextRequest, NextResponse } from "next/server"
 
-
-const createTransaction = async (
+async function createTransaction(
   automationId: string,
   sender: string,
   reciever: string,
   text: string,
   content: string
-) => {
+) {
   console.log(text, "&", content)
-  await db.transaction(async () => {
-    await createChatHistory(automationId, sender, reciever, text),
-      await createChatHistory(automationId, sender, reciever, content)
-  })
+  // await db.transaction(async () => {
+  //   await createChatHistory(automationId, sender, reciever, text),
+  //     await createChatHistory(automationId, sender, reciever, content)
+  // })
   console.log("TRANSACTION CREATED!!!")
 }
 

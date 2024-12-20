@@ -166,13 +166,17 @@ export async function POST(req: NextRequest) {
                   ]
                 })
                 console.log("DONE PROMPTING...", smart_ai_message.choices[0].message)
-                await createTransaction(
-                  automation.id,
-                  webhook_id,
-                  webhook_payload.entry[0].messaging[0].sender.id,
-                  webhook_payload.entry[0].messaging[0].message.text,
-                  smart_ai_message.choices[0].message.content!
-                )
+                try {
+                  await createTransaction(
+                    automation.id,
+                    webhook_id,
+                    webhook_payload.entry[0].messaging[0].sender.id,
+                    webhook_payload.entry[0].messaging[0].message.text,
+                    smart_ai_message.choices[0].message.content!
+                  )
+                } catch (error) {
+                  console.error(error)
+                }
                 console.log("DONE PROMPTING...", smart_ai_message.choices[0].message.content)
 
                 if (smart_ai_message.choices[0].message && smart_ai_message.choices[0].message.content) {

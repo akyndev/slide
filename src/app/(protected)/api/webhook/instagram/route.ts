@@ -205,15 +205,15 @@ export async function POST(req: NextRequest) {
 
       if (!matcher) {
         console.log("GETTING CHAT HISTORY...")
-        try {
-          const customer_history = await getChatHistory(
-            webhook_payload.entry[0].messaging[0].recipient.id,
-            webhook_payload.entry[0].messaging[0].sender.id
-          )
-          console.log("DONE GETTING CHAT HISTORY!!!", customer_history)
+        const customer_history = await getChatHistory(
+          webhook_payload.entry[0].messaging[0].recipient.id,
+          webhook_payload.entry[0].messaging[0].sender.id
+        )
+        console.log("DONE GETTING CHAT HISTORY!!!", customer_history)
 
-          if (customer_history.history.length > 0) {
-            const automation = await findAutomation(customer_history.automationId!)
+        if (customer_history.history.length > 0) {
+          if (customer_history.automationId) {
+            const automation = await findAutomation(customer_history.automationId)
 
             if (automation?.user?.subscription?.plan === "pro" && automation.listener?.listener === "smart_ai") {
               console.log("PROMPTING GROK IN A NO MATCHER....")
@@ -263,8 +263,6 @@ export async function POST(req: NextRequest) {
               }
             }
           }
-        } catch (error) {
-          console.log(error)
         }
 
         return NextResponse.json(

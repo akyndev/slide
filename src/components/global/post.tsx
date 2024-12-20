@@ -13,7 +13,7 @@ type Props = {
 }
 
 const PostButton = ({ id }: Props) => {
-  const { data } = useQueryAutomationPosts(id)
+  const { data } = useQueryAutomationPosts()
   const { posts, onSelectPost, mutate, isPending } = useAutomationPosts(id)
 
   return (

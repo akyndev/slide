@@ -27,7 +27,7 @@ export const useQueryAutomation = (id: string) => {
   })
 }
 
-export const useQueryAutomationPosts = (id: string) => {
+export const useQueryAutomationPosts = () => {
   const fetchPosts = async () => await getProfilePosts()
   return useQuery({
     queryKey: ["instagram-media"],

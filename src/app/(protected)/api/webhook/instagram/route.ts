@@ -24,8 +24,6 @@ export async function POST(req: NextRequest) {
     console.log("WEBHOOK PAYLOAD", webhook_payload)
     const changes = webhook_payload.entry[0].changes
     const webhook_id = webhook_payload.entry[0].id
-    const changes_id = changes[0].value.id
-    const changes_text = changes[0].value.text
 
     let matcher
 
@@ -33,7 +31,7 @@ export async function POST(req: NextRequest) {
       if (webhook_payload.entry[0].messaging)
         matcher = await matchKeyword(webhook_payload.entry[0].messaging[0].message.text)
 
-      if (changes) matcher = await matchKeyword(changes_text)
+      if (changes) matcher = await matchKeyword(changes[0].value.text)
 
       if (matcher && matcher.automationId) {
         console.log("Matched", matcher)
@@ -132,7 +130,7 @@ export async function POST(req: NextRequest) {
 
                 const direct_message = await sendPrivateMessage(
                   webhook_id,
-                  changes_id,
+                  changes[0].value.id,
                   automation.listener?.prompt!,
                   automation.user?.integrations[0].token!
                 )
@@ -179,7 +177,7 @@ export async function POST(req: NextRequest) {
 
                   const direct_message = await sendPrivateMessage(
                     webhook_id,
-                    changes_id,
+                    changes[0].value.id,
                     smart_ai_message.choices[0].message.content,
                     automation.user?.integrations[0].token!
                   )

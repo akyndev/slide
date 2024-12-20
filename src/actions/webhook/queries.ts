@@ -107,7 +107,7 @@ export const createTransaction = async (
   text: string,
   content: string
 ) => {
-  console.log("CREATING TRANSACTION...")
+  console.log(text, "&", content)
   await db.transaction(async () => {
     await createChatHistory(automationId, sender, reciever, text),
       await createChatHistory(automationId, sender, reciever, content)

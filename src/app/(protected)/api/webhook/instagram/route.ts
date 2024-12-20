@@ -206,8 +206,8 @@ export async function POST(req: NextRequest) {
       if (!matcher) {
         console.log("GETTING CHAT HISTORY...")
         const customer_history = await getChatHistory(
-          webhook_payload.entry[0].messaging[0].recipient.id,
-          webhook_payload.entry[0].messaging[0].sender.id
+          webhook_payload.entry[0].messaging[0].sender.id,
+          webhook_payload.entry[0].messaging[0].recipient.id
         )
         console.log("DONE GETTING CHAT HISTORY!!!", customer_history)
 

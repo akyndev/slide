@@ -9,7 +9,6 @@ const increment = (column: AnyColumn, value = 1) => {
 }
 
 export const getChatHistory = async (senderId: string, recieverId: string) => {
-  console.log(senderId, recieverId)
   const history = await db.query.dms.findMany({
     where: and(eq(dms.senderId, senderId), eq(dms.reciever, recieverId)),
     orderBy: [asc(dms.createdAt)]
@@ -27,7 +26,7 @@ export const getChatHistory = async (senderId: string, recieverId: string) => {
 
   return {
     history: chatSession,
-    automationId: history[history.length - 1].automationId
+    automationId: history[history.length - 1]?.automationId
   }
 }
 

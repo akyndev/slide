@@ -9,7 +9,7 @@ const increment = (column: AnyColumn, value = 1) => {
 }
 
 export const createChatHistory = async (automationId: string, sender: string, reciever: string, message: string) => {
-  return db.insert(dms).values({
+  return await db.insert(dms).values({
     automationId,
     senderId: sender,
     reciever,
@@ -109,8 +109,8 @@ export const createTransaction = async (
 ) => {
   console.log(text, "&", content)
   await db.transaction(async () => {
-    await createChatHistory(automationId, sender, reciever, text),
-      await createChatHistory(automationId, sender, reciever, content)
+    await createChatHistory(automationId, sender, reciever, text)
+    await createChatHistory(automationId, sender, reciever, content)
   })
   console.log("TRANSACTION CREATED!!!")
 }

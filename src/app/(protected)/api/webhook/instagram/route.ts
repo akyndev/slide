@@ -1,18 +1,16 @@
 import { findAutomation } from "@/actions/automations/queries"
 import {
-  createChatHistory,
+  createTransaction,
   getChatHistory,
   getKeywordAutomation,
   getKeywordPost,
   matchKeyword,
   trackResponses
 } from "@/actions/webhook/queries"
-import { db } from "@/db"
 import { sendDM, sendPrivateMessage } from "@/lib/fetch"
 import { openai } from "@/lib/openai"
+
 import { NextRequest, NextResponse } from "next/server"
-
-
 
 export async function GET(req: NextRequest) {
   const hub = req.nextUrl.searchParams.get("hub.challenge")
@@ -83,21 +81,14 @@ export async function POST(req: NextRequest) {
                 ]
               })
 
-              if (smart_ai_message.choices[0].message.content) {
-                await db.transaction(async () => {
-                  await createChatHistory(
-                    automation.id,
-                    webhook_id,
-                    webhook_payload.entry[0].messaging[0].sender.id,
-                    webhook_payload.entry[0].messaging[0].message.text
-                  );
-                    await createChatHistory(
-                      automation.id,
-                      webhook_id,
-                      webhook_payload.entry[0].messaging[0].sender.id,
-                      smart_ai_message.choices[0].message.content!
-                    )
-                })
+              if (smart_ai_message.choices[0].message && smart_ai_message.choices[0].message.content) {
+                await createTransaction(
+                  automation.id,
+                  webhook_id,
+                  webhook_payload.entry[0].messaging[0].sender.id,
+                  webhook_payload.entry[0].messaging[0].message.text,
+                  smart_ai_message.choices[0].message.content
+                )
 
                 const direct_message = await sendDM(
                   webhook_id,
@@ -175,24 +166,16 @@ export async function POST(req: NextRequest) {
                   ]
                 })
                 console.log("DONE PROMPTING...", smart_ai_message.choices[0].message)
+                await createTransaction(
+                  automation.id,
+                  webhook_id,
+                  webhook_payload.entry[0].messaging[0].sender.id,
+                  webhook_payload.entry[0].messaging[0].message.text,
+                  smart_ai_message.choices[0].message.content!
+                )
                 console.log("DONE PROMPTING...", smart_ai_message.choices[0].message.content)
 
-                if (smart_ai_message.choices[0].message.content) {
-                  console.log("CREATING TRANSACTION...")
-                  await db.transaction(async () => {
-                    await createChatHistory(
-                      automation.id,
-                      webhook_id,
-                      webhook_payload.entry[0].messaging[0].sender.id,
-                      webhook_payload.entry[0].messaging[0].message.text
-                    );
-                      await createChatHistory(
-                        automation.id,
-                        webhook_id,
-                        webhook_payload.entry[0].messaging[0].sender.id,
-                        smart_ai_message.choices[0].message.content!
-                      )
-                  })
+                if (smart_ai_message.choices[0].message && smart_ai_message.choices[0].message.content) {
 
                   const direct_message = await sendPrivateMessage(
                     webhook_id,
@@ -251,21 +234,14 @@ export async function POST(req: NextRequest) {
             })
             console.log("DONE PROMPTING...", smart_ai_message)
 
-            if (smart_ai_message.choices[0].message.content) {
-              await db.transaction(async () => {
-                await createChatHistory(
-                  automation.id,
-                  webhook_id,
-                  webhook_payload.entry[0].messaging[0].sender.id,
-                  webhook_payload.entry[0].messaging[0].message.text
-                );
-                  await createChatHistory(
-                    automation.id,
-                    webhook_id,
-                    webhook_payload.entry[0].messaging[0].sender.id,
-                    smart_ai_message.choices[0].message.content!
-                  )
-              })
+            if (smart_ai_message.choices[0].message && smart_ai_message.choices[0].message.content) {
+              await createTransaction(
+                automation.id,
+                webhook_id,
+                webhook_payload.entry[0].messaging[0].sender.id,
+                webhook_payload.entry[0].messaging[0].message.text,
+                smart_ai_message.choices[0].message.content!
+              )
 
               const direct_message = await sendDM(
                 webhook_id,

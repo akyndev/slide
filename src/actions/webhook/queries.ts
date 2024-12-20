@@ -100,3 +100,17 @@ export const trackResponses = async (automationId: string, type: "dm" | "comment
   }
 }
 
+export const createTransaction = async (
+  automationId: string,
+  sender: string,
+  reciever: string,
+  text: string,
+  content: string
+) => {
+  console.log(text, "&", content)
+  await db.transaction(async () => {
+    await createChatHistory(automationId, sender, reciever, text),
+      await createChatHistory(automationId, sender, reciever, content)
+  })
+  console.log("TRANSACTION CREATED!!!")
+}

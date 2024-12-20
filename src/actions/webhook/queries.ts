@@ -100,26 +100,23 @@ export const createTransaction = async (
 ) => {
   console.log("CREATING TRANSACTION...")
   try {
-
-    await db.transaction(async (tx) => {
-      await tx.insert(dms).values({
+    await db.batch([
+      db.insert(dms).values({
         automationId,
         senderId: sender,
         reciever,
         message: text
-    })
-    console.log("CREATED FIRST TRANSACTION... MOVING.............")
-    await tx.insert(dms).values({
-      automationId,
-      senderId: sender,
-      reciever,
-      message: content
-    })
-  })
+      }),
+      db.insert(dms).values({
+        automationId,
+        senderId: sender,
+        reciever,
+        message: content
+      })
+    ])
   } catch (error) {
     console.log(error)
-
     console.log("TRANSACTION FAILED TO CREATE!!!")
-}
+  }
   console.log("TRANSACTION CREATED!!!")
 }

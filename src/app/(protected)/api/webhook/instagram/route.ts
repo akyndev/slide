@@ -205,62 +205,66 @@ export async function POST(req: NextRequest) {
 
       if (!matcher) {
         console.log("GETTING CHAT HISTORY...")
-        const customer_history = await getChatHistory(
-          webhook_payload.entry[0].messaging[0].recipient.id,
-          webhook_payload.entry[0].messaging[0].sender.id
-        )
-        console.log("DONE GETTING CHAT HISTORY!!!")
+        try {
+          const customer_history = await getChatHistory(
+            webhook_payload.entry[0].messaging[0].recipient.id,
+            webhook_payload.entry[0].messaging[0].sender.id
+          )
+          console.log("DONE GETTING CHAT HISTORY!!!", customer_history)
 
-        if (customer_history.history.length > 0) {
-          const automation = await findAutomation(customer_history.automationId!)
+          if (customer_history.history.length > 0) {
+            const automation = await findAutomation(customer_history.automationId!)
 
-          if (automation?.user?.subscription?.plan === "pro" && automation.listener?.listener === "smart_ai") {
-            console.log("PROMPTING GROK IN A NO MATCHER....")
-            const smart_ai_message = await openai.chat.completions.create({
-              model: "grok-2-1212",
-              messages: [
-                {
-                  role: "assistant",
-                  content: `${automation.listener?.prompt}: keep responses under 2 sentences`
-                },
-                ...customer_history.history,
-                {
-                  role: "user",
-                  content: webhook_payload.entry[0].messaging[0].message.text
-                }
-              ]
-            })
-            console.log("DONE PROMPTING...", smart_ai_message)
-
-            if (smart_ai_message.choices[0].message && smart_ai_message.choices[0].message.content) {
-              await createTransaction(
-                automation.id,
-                webhook_id,
-                webhook_payload.entry[0].messaging[0].sender.id,
-                webhook_payload.entry[0].messaging[0].message.text,
-                smart_ai_message.choices[0].message.content!
-              )
-
-              const direct_message = await sendDM(
-                webhook_id,
-                webhook_payload.entry[0].messaging[0].sender.id,
-                smart_ai_message.choices[0].message.content,
-                automation.user?.integrations[0].token!
-              )
-              console.log("DIRECT MESSAGE SENT!!!", direct_message)
-
-              if (direct_message.status === 200) {
-                //if successfully send we return
-
-                return NextResponse.json(
+            if (automation?.user?.subscription?.plan === "pro" && automation.listener?.listener === "smart_ai") {
+              console.log("PROMPTING GROK IN A NO MATCHER....")
+              const smart_ai_message = await openai.chat.completions.create({
+                model: "grok-2-1212",
+                messages: [
                   {
-                    message: "Message sent"
+                    role: "assistant",
+                    content: `${automation.listener?.prompt}: keep responses under 2 sentences`
                   },
-                  { status: 200 }
+                  ...customer_history.history,
+                  {
+                    role: "user",
+                    content: webhook_payload.entry[0].messaging[0].message.text
+                  }
+                ]
+              })
+              console.log("DONE PROMPTING...", smart_ai_message)
+
+              if (smart_ai_message.choices[0].message && smart_ai_message.choices[0].message.content) {
+                await createTransaction(
+                  automation.id,
+                  webhook_id,
+                  webhook_payload.entry[0].messaging[0].sender.id,
+                  webhook_payload.entry[0].messaging[0].message.text,
+                  smart_ai_message.choices[0].message.content!
                 )
+
+                const direct_message = await sendDM(
+                  webhook_id,
+                  webhook_payload.entry[0].messaging[0].sender.id,
+                  smart_ai_message.choices[0].message.content,
+                  automation.user?.integrations[0].token!
+                )
+                console.log("DIRECT MESSAGE SENT!!!", direct_message)
+
+                if (direct_message.status === 200) {
+                  //if successfully send we return
+
+                  return NextResponse.json(
+                    {
+                      message: "Message sent"
+                    },
+                    { status: 200 }
+                  )
+                }
               }
             }
           }
+        } catch (error) {
+          console.log(error)
         }
 
         return NextResponse.json(

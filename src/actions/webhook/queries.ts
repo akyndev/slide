@@ -109,7 +109,7 @@ export const createTransaction = async (
 ) => {
   console.log("CREATING TRANSACTION...")
   await db.transaction(async () => {
-    await createChatHistory(automationId, sender, reciever, text)
+    await createChatHistory(automationId, sender, reciever, text);
     await createChatHistory(automationId, sender, reciever, content)
   })
   console.log("TRANSACTION CREATED!!!")

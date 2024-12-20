@@ -99,12 +99,14 @@ export const createTransaction = async (
   content: string
 ) => {
   console.log("CREATING TRANSACTION...")
-  await db.transaction(async (tx) => {
-    await tx.insert(dms).values({
-      automationId,
-      senderId: sender,
-      reciever,
-      message: text
+  try {
+
+    await db.transaction(async (tx) => {
+      await tx.insert(dms).values({
+        automationId,
+        senderId: sender,
+        reciever,
+        message: text
     })
     console.log("CREATED FIRST TRANSACTION... MOVING.............")
     await tx.insert(dms).values({
@@ -114,5 +116,10 @@ export const createTransaction = async (
       message: content
     })
   })
+  } catch (error) {
+    console.log(error)
+
+    console.log("TRANSACTION FAILED TO CREATE!!!")
+}
   console.log("TRANSACTION CREATED!!!")
 }

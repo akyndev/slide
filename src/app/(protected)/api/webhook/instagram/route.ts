@@ -166,24 +166,21 @@ export async function POST(req: NextRequest) {
                   ]
                 })
                 console.log("DONE PROMPTING...", smart_ai_message.choices[0].message)
-                try {
-                  await createTransaction(
-                    automation.id,
-                    webhook_id,
-                    webhook_payload.entry[0].messaging[0].sender.id,
-                    webhook_payload.entry[0].messaging[0].message.text,
-                    smart_ai_message.choices[0].message.content!
-                  )
-                } catch (error) {
-                  console.error(error)
-                }
                 console.log("DONE PROMPTING...", smart_ai_message.choices[0].message.content)
 
                 if (smart_ai_message.choices[0].message && smart_ai_message.choices[0].message.content) {
+                  await createTransaction(
+                    automation.id,
+                    webhook_payload.entry[0].id,
+                    webhook_payload.entry[0].changes[0].value.from.id,
+                    webhook_payload.entry[0].changes[0].value.text,
+                    smart_ai_message.choices[0].message.content
+                  )
+
                   const direct_message = await sendPrivateMessage(
                     webhook_id,
                     changes_id,
-                    automation.listener?.prompt!,
+                    smart_ai_message.choices[0].message.content,
                     automation.user?.integrations[0].token!
                   )
                   console.log("PRIVATE MESSAGE SENT!!!", direct_message)

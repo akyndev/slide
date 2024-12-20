@@ -8,7 +8,7 @@ const increment = (column: AnyColumn, value = 1) => {
   return sql`${column} + ${value}`
 }
 
-export const getChatHistory = async (senderId: string, recieverId: string) => {
+export const getChatHistory = async (recieverId: string, senderId: string) => {
   console.log("sender Id:", senderId, "reciever Id:", recieverId)
   const history = await db.query.dms.findMany({
     where: and(eq(dms.senderId, senderId), eq(dms.reciever, recieverId)),

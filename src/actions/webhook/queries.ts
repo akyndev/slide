@@ -22,6 +22,7 @@ export const getChatHistory = async (recieverId: string, senderId: string) => {
       content: chat.message!
     }
   })
+  console.log(history)
 
   return {
     history: chatSession,

@@ -8,15 +8,6 @@ const increment = (column: AnyColumn, value = 1) => {
   return sql`${column} + ${value}`
 }
 
-export const createChatHistory = async (automationId: string, sender: string, reciever: string, message: string) => {
-  await db.insert(dms).values({
-    automationId,
-    senderId: sender,
-    reciever,
-    message
-  })
-}
-
 export const getChatHistory = async (recieverId: string, senderId: string) => {
   const history = await db.query.dms.findMany({
     where: and(eq(dms.senderId, senderId), eq(dms.reciever, recieverId)),
@@ -108,9 +99,20 @@ export const createTransaction = async (
   content: string
 ) => {
   console.log("CREATING TRANSACTION...")
-  await db.transaction(async () => {
-    await createChatHistory(automationId, sender, reciever, text)
-    await createChatHistory(automationId, sender, reciever, content)
+  await db.transaction(async (tx) => {
+    await tx.insert(dms).values({
+      automationId,
+      senderId: sender,
+      reciever,
+      message: text
+    })
+    console.log("CREATED FIRST TRANSACTION... MOVING.............")
+    await tx.insert(dms).values({
+      automationId,
+      senderId: sender,
+      reciever,
+      message: content
+    })
   })
   console.log("TRANSACTION CREATED!!!")
 }

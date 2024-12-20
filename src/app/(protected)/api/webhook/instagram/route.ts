@@ -12,20 +12,7 @@ import { sendDM, sendPrivateMessage } from "@/lib/fetch"
 import { openai } from "@/lib/openai"
 import { NextRequest, NextResponse } from "next/server"
 
-async function createTransaction(
-  automationId: string,
-  sender: string,
-  reciever: string,
-  text: string,
-  content: string
-) {
-  console.log(text, "&", content)
-  await db.transaction(async () => {
-    await createChatHistory(automationId, sender, reciever, text),
-      await createChatHistory(automationId, sender, reciever, content)
-  })
-  console.log("TRANSACTION CREATED!!!")
-}
+
 
 export async function GET(req: NextRequest) {
   const hub = req.nextUrl.searchParams.get("hub.challenge")
@@ -103,7 +90,7 @@ export async function POST(req: NextRequest) {
                     webhook_id,
                     webhook_payload.entry[0].messaging[0].sender.id,
                     webhook_payload.entry[0].messaging[0].message.text
-                  ),
+                  );
                     await createChatHistory(
                       automation.id,
                       webhook_id,
@@ -198,7 +185,7 @@ export async function POST(req: NextRequest) {
                       webhook_id,
                       webhook_payload.entry[0].messaging[0].sender.id,
                       webhook_payload.entry[0].messaging[0].message.text
-                    ),
+                    );
                       await createChatHistory(
                         automation.id,
                         webhook_id,
@@ -271,7 +258,7 @@ export async function POST(req: NextRequest) {
                   webhook_id,
                   webhook_payload.entry[0].messaging[0].sender.id,
                   webhook_payload.entry[0].messaging[0].message.text
-                ),
+                );
                   await createChatHistory(
                     automation.id,
                     webhook_id,

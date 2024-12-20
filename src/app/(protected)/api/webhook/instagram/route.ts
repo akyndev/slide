@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   console.log("WEBHOOK STARTING...")
   const webhook_payload = await req.json()
-  if (webhook_payload) {
+  if (webhook_payload && webhook_payload.entry[0]) {
     console.log("WEBHOOK PAYLOAD", webhook_payload)
     const changes = webhook_payload.entry[0].changes
     const webhook_id = webhook_payload.entry[0].id

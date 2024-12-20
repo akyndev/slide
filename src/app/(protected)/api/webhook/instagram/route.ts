@@ -165,7 +165,8 @@ export async function POST(req: NextRequest) {
                     }
                   ]
                 })
-                console.log("DONE PROMPTING...", smart_ai_message)
+                console.log("DONE PROMPTING...", smart_ai_message.choices[0].message)
+                console.log("DONE PROMPTING...", smart_ai_message.choices[0].message.content)
 
                 if (smart_ai_message.choices[0].message.content) {
                   await createTransaction(
